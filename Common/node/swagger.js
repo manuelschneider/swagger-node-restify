@@ -30,6 +30,7 @@ exports.factory = function () {
   var allowedDataTypes = ['string', 'int', 'long', 'double', 'boolean', 'date', 'array'];
   var params = require(__dirname + '/paramTypes.js');
   var allModels = {};
+  var overridable = {};
 
   // Default error handler
   var errorHandler = function (req, res, error) {
@@ -79,6 +80,8 @@ exports.factory = function () {
     res.header("Content-Type", "application/json; charset=utf-8");
   }
 
+  overridable.setHeaders = setHeaders;
+
   // creates declarations for each resource path.
 
   function setResourceListingPaths(app) {
@@ -102,7 +105,7 @@ exports.factory = function () {
             'code': 500
           });
         } else {
-          setHeaders(res);
+          overridable.setHeaders(res);
           var data = filterApiListing(req, res, r);
           data.basePath = basePath;
           if (data.code) {
@@ -338,7 +341,7 @@ exports.factory = function () {
       });
     });
 
-    setHeaders(res);
+    overridable.setHeaders(res);
     res.write(JSON.stringify(r));
     res.end();
   }
@@ -388,7 +391,7 @@ exports.factory = function () {
     var currentMethod = spec.method.toLowerCase();
     if (allowedMethods.indexOf(currentMethod) > -1) {
       app[currentMethod](fullPath, function (req, res, next) {
-        setHeaders(res);
+        overridable.setHeaders(res);
 
         // todo: needs to do smarter matching against the defined paths
         var path = req.url.split('?')[0].replace(jsonSuffix, "").replace(/{.*\}/, "*");
@@ -603,7 +606,7 @@ exports.factory = function () {
   // Stop express ressource with error code
 
   function stopWithError(res, error) {
-    setHeaders(res);
+    overridable.setHeaders(res);
     if (error && error.message && error.code)
       res.send(error.code, error);
     else
@@ -702,7 +705,7 @@ exports.factory = function () {
   this.canAccessResource = canAccessResource;
   this.resourcePath = resourcePath;
   this.resourceListing = resourceListing;
-  this.setHeaders = setHeaders;
+  this.overridable = overridable;
   this.addGet = addGet;
   this.addPost = addPost;
   this.addPut = addPut;
@@ -718,7 +721,6 @@ exports.factory = function () {
   this.discover = discover;
   this.discoverFile = discoverFile;
   this.configureSwaggerPaths = configureSwaggerPaths;
-  this.setHeaders = setHeaders;
   this.setApiInfo = setApiInfo;
   this.setAuthorizations = setAuthorizations;
   this.configureDeclaration = configureDeclaration;
