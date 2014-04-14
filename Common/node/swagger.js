@@ -388,6 +388,9 @@ exports.factory = function () {
 
     //  convert .{format} to .json, make path params happy
     var fullPath = spec.path.replace(formatString, jsonSuffix).replace(/\/{/g, "/:").replace(/\}/g, "");
+    if (spec.pathPrefix) {
+      fullPath = spec.pathPrefix + fullPath;
+    }
     var currentMethod = spec.method.toLowerCase();
     if (allowedMethods.indexOf(currentMethod) > -1) {
       app[currentMethod](fullPath, function (req, res, next) {
